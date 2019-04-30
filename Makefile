@@ -7,7 +7,7 @@ CFLAGS=$(COMFLAGS)
 #CXXFLAGS=$(CFLAGS) -I./src -O2 -stdlib=libc++
 CXXFLAGS=$(CFLAGS) -I./src -stdlib=libc++
 LDFLAGS=-rpath,@executable_path/../Frameworks
-#COMPILE.d = $(DC) $(DFLAGS) -wi -g -d -O2 -c -of=$@
+#COMPILE.d = $(DC) $(DFLAGS) -wi -d -O2 -c -of=$@
 COMPILE.d = $(DC) $(DFLAGS) -wi -g -d -c -of=$@
 DC=ldc2
 EXE=
