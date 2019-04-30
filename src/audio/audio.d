@@ -37,8 +37,6 @@ extern(C) {
 	int audio_init(int fr, void function() cb) {
 		SDL_AudioSpec requested;
 
-		SDL_memset(&requested, 0, requested.sizeof);
-
 		if(audioInited) return 0;
 
 		audioInited = true;
@@ -131,8 +129,10 @@ extern(C) {
 	__gshared void audio_callback_2(void *userdata, ubyte* stream, int len) {
 		int samplesRequested = cast(int) (len / short.sizeof);
 		int i,t;
-		SDL_memset(stream, 0, len);
-		if(!audio.player.isPlaying()) return;
+		if(!audio.player.isPlaying()) {
+			SDL_memset(stream, 0, len);
+			return;
+		}
 		while((bufferUsed + callbackInterval) <= bufferSize * MIXBUF_MUL) {
 			t = sid_fillbuffer(mixbuf+bufferUsed, callbackInterval, cyclesPerFrame);
 			bufferUsed += t;
