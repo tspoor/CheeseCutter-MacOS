@@ -3,7 +3,7 @@ CheeseCutter v2 (C) Abaddon. Licensed under GNU GPL.
 */
 
 module ui.ui;
-import derelict.sdl.sdl;
+import derelict.sdl2.sdl;
 import std.conv;
 import main;
 import ct.base;
@@ -22,6 +22,8 @@ import audio.audio;
 import std.string;
 import std.file;
 import std.stdio;
+static import audio.timer;
+static import audio.callback;
 
 enum PAGESTEP = 16;
 enum CONFIRM_TIMEOUT = 90;
@@ -431,7 +433,7 @@ final private class Toplevel : WindowSwitcher {
 	}
 
 	override int keypress(Keyinfo key) {
-		switch(key.unicode) {
+		switch(key.key) {
 		case ']':
 			if(song.speed < 32) 
 				song.speed = song.speed + 1;
@@ -515,7 +517,7 @@ final private class Toplevel : WindowSwitcher {
 			case SDLK_t:
 				ui.activateDialog(UI.infobar);
 				return OK;
-			case SDLK_KP0:
+			case SDLK_KP_0:
 				clearSeqs();
 				return OK;
 			case SDLK_KP_PERIOD:
@@ -1047,7 +1049,7 @@ final class UI {
 				 }
 				 tickcounter3 = 0;
 				 break;
-			 case SDLK_PRINT:
+			 case SDLK_PRIOR:
 			 	 audio.player.dumpFrame();
 			 	 break;
 			 case SDLK_F1:
@@ -1059,7 +1061,7 @@ final class UI {
 			 case SDLK_F3:
 				 toplevel.playFromCursor();
 				 break;
-			 case SDLK_SCROLLOCK:
+			 case SDLK_SCROLLLOCK:
 				 if(!audio.player.isPlaying) break;
 				 if(toplevel.fplayEnabled()) {
 					 stop(false);
@@ -1249,7 +1251,7 @@ final class UI {
 		UI.activateInstrument(ins);
 		// just hacking away.....
 		toplevel.activateWindow(2);
-		toplevel.keypress(Keyinfo(SDLK_i, KMOD_ALT, 0));
+		toplevel.keypress(Keyinfo(SDLK_i, KMOD_ALT));
 	}
 
 	static void stop() {

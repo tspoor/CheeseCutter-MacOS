@@ -1,26 +1,23 @@
-# make install DESTDIR=/home/yamo/devel/cc2/snap/parts/ccutter/install
-
-LIBS=-ldl -lstdc++
-COMFLAGS=-O2 -g
+LIBS=/usr/local/lib/libphobos2-ldc.a /usr/local/lib/libdruntime-ldc.a -lc++ 
+COMFLAGS= -mmacosx-version-min=10.14
 VERSION=$(shell cat Version)
-DFLAGS=$(COMFLAGS) $(LDFLAGS) -I./src -J./src/c64 -J./src/font
-CFLAGS:=$(COMFLAGS) $(CFLAGS)
-CXXFLAGS=$(COMFLAGS) $(CPPFLAGS) -I./src 
-COMPILE.d = $(DC) $(DFLAGS) -c
-DC=gdc
+DLINK=$(COMFLAGS)
+DFLAGS=-I./src -J./src/c64 -J./src/font
+CFLAGS=$(COMFLAGS)
+#CXXFLAGS=$(CFLAGS) -I./src -O2 -stdlib=libc++
+CXXFLAGS=$(CFLAGS) -I./src -stdlib=libc++
+LDFLAGS=-rpath,@executable_path/../Frameworks
+#COMPILE.d = $(DC) $(DFLAGS) -wi -g -d -O2 -c -of=$@
+COMPILE.d = $(DC) $(DFLAGS) -wi -g -d -c -of=$@
+DC=ldc2
 EXE=
 TARGET=ccutter
 OBJ_EXT=.o
 
 include Makefile.objects.mk
 
-.PHONY: install release dist clean dclean tar
-
-all: ct2util ccutter
-
-ccutter:$(C64OBJS) $(OBJS) $(CXX_OBJS)
-	$(DC) $(COMFLAGS) -o $@ $(OBJS) $(CXX_OBJS) $(LIBS)
-
+$(TARGET): $(C64OBJS) $(OBJS) $(CXX_OBJS)
+	$(CC) $(DLINK) -Wl,$(LDFLAGS) -o $(TARGET) $(OBJS) $(CXX_OBJS) $(LIBS) 
 
 .cpp.o : $(CXX_SRCS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
@@ -31,38 +28,41 @@ ccutter:$(C64OBJS) $(OBJS) $(CXX_OBJS)
 ct: $(C64OBJS) $(CTOBJS)
 
 ct2util: $(C64OBJS) $(UTILOBJS)
-	$(DC) $(COMFLAGS) -o $@ $(UTILOBJS)
+	$(CC) $(DLINK) -o $@ $(UTILOBJS) $(LIBS)
 
 c64: $(C64OBJS)
 
-install: all
-	strip ccutter$(EXE)
-	strip ct2util$(EXE)
-	cp ccutter$(EXE) $(DESTDIR)
-	cp ct2util$(EXE) $(DESTDIR)
-	mkdir $(DESTDIR)/example_tunes
-	cp -r tunes/* $(DESTDIR)/example_tunes
+all: c64 $(OBJS) $(CXX_OBJS) ct2util ct $(TARGET)
 
-# release version with additional optimizations
-release: DFLAGS += -frelease -fno-bounds-check
 release: all
 	strip ccutter$(EXE)
 	strip ct2util$(EXE)
 
-# tarred release
+	rm -rf CheeseCutter.app
+	mkdir -p CheeseCutter.app/Contents/Frameworks
+	mkdir -p CheeseCutter.app/Contents/MacOS
+	cp -r arch/MacOS/Contents CheeseCutter.app
+	cp -r /Library/Frameworks/SDL.framework CheeseCutter.app/Contents/Frameworks
+	cp $(TARGET) CheeseCutter.app/Contents/MacOS
+	cp ct2util CheeseCutter.app/Contents/MacOS
+
 dist:	release
-	tar --transform 's,^\.,cheesecutter-$(VERSION),' -cvf cheesecutter-$(VERSION)-linux-x86.tar.gz $(DIST_FILES)
+	rm -rf dist
+	rm -rf CheeseCutter_$(VERSION).dmg
+	arch/makedmg.sh
 
 clean: 
 	rm -f *.o *~ resid/*.o resid-fp/*.o ccutter ct2util \
-		$(C64OBJS) $(OBJS) $(CTOBJS) $(CXX_OBJS) $(UTILOBJS) $(C_OBJS)
+		$(C64OBJS) $(OBJS) $(CTOBJS) $(CXX_OBJS) $(UTILOBJS)
 
 dclean: clean
-	rm -f cheesecutter-$(VERSION)-linux-x86.tar.gz
+	rm -rf dist
+	rm -rf CheeseCutter.app
+	rm -rf CheeseCutter_$(VERSION).dmg
 
-# tarred source from master
+
 tar:
-	git archive master --prefix=cheesecutter-$(VERSION)/ | bzip2 > cheesecutter-$(VERSION)-src.tar.bz2
+	git archive master --prefix=cheesecutter-$(VERSION)/ | bzip2 > cheesecutter-$(VERSION)-macosx-src.tar.bz2
 # --------------------------------------------------------------------------------
 
 src/c64/player.bin: src/c64/player_v4.acme
@@ -72,7 +72,7 @@ src/ct/base.o: src/c64/player.bin
 src/ui/ui.o: src/ui/help.o
 
 %.o: %.d
-	$(COMPILE.d) -o $@ $<
+	$(COMPILE.d) $<
 
 
 

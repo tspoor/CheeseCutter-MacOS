@@ -3,11 +3,13 @@ CheeseCutter v2 (C) Abaddon. Licensed under GNU GPL.
 */
 
 module audio.callback;
-import derelict.sdl.sdl;
+import derelict.sdl2.sdl;
 import audio.player;
 import com.session;
 import com.cpu;
 import ct.base;
+import audio.timer;
+static import audio.audio;
 
 /+ holds the state of cpu and memory for frame debug dumps. not implemented for now. +/
 class SongState {
@@ -118,7 +120,7 @@ void cpuCall(ushort pc, bool lockAudio, bool forcedump) {
 	}
 	catch(CPUException e) {
 		playbackStatus = e;
-		stop(); // < TODO: player.d should check if playback is in error state and stop by itself
+		//stop(); // < TODO: player.d should check if playback is in error state and stop by itself
 		//UI.statusline.display(e.toString());
 		//stop();
 	}

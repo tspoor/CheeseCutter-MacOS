@@ -7,6 +7,7 @@ import std.stdio;
 import std.string;
 import std.conv;
 //import std.regex;
+static import std.array;
 
 alias char* PetString;
 

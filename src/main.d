@@ -3,7 +3,7 @@ CheeseCutter v2 (C) Abaddon. Licensed under GNU GPL.
 */
 
 module main;
-import derelict.sdl.sdl;
+import derelict.sdl2.sdl;
 import com.fb;
 import com.session;
 import com.kbd;
@@ -17,6 +17,7 @@ import std.stdio;
 import std.string;
 import std.conv;
 import std.file;
+static import audio.timer;
 
 version(linux) {
 	const DIR_SEPARATOR = '/';
@@ -36,20 +37,18 @@ void initVideo(bool useFullscreen, bool useyuv) {
 	if( SDL_Init(SDL_INIT_VIDEO) < 0) {
 		throw new DisplayError("Couldn't initialize framebuffer.");
 	}
+
 	mx = 800; my = 600;
 	int width = mx / FONT_X;
 	int height = my / FONT_Y;
 	screen = new Screen(width, height);
-	video = useyuv ? new VideoYUV(800, 600, screen, useFullscreen ? 1 : 0) :
-		new VideoStandard(800, 600, screen, useFullscreen ? 1 : 0);
+	video = new VideoStandard(800, 600, screen, useFullscreen ? 1 : 0);
 
-	SDL_EnableKeyRepeat(200, 10);
-	SDL_EnableUNICODE(1);
-	SDL_WM_SetCaption("CheeseCutter".toStringz(),"CheeseCutter".toStringz());
+	//SDL_EnableKeyRepeat(200, 10);
 }
 
 void mainloop() {
-	int mods, key, unicode;
+	int mods, key;
 	bool quit = false;
 	SDL_Event evt;
 	while(!quit) {
@@ -67,15 +66,15 @@ void mainloop() {
 				}
 				mods = evt.key.keysym.mod;
 				key = evt.key.keysym.sym;
-				unicode = evt.key.keysym.unicode;
 				mods &= 0xffffff - KMOD_NUM;
-				auto keyinfo = Keyinfo(key, mods, unicode);
+				auto keyinfo = Keyinfo(key, mods);
 				com.kbd.translate(keyinfo);
+
 				version(OSX) {
-					if (key == SDLK_q && evt.key.keysym.mod & KMOD_META)
+					if (key == SDLK_q && evt.key.keysym.mod & (KMOD_LGUI|KMOD_RGUI))
 						quit=true;
 				}	
-				
+
 				mainui.keypress(keyinfo);
 				if(mainui.exitRequested)
 					quit = true;
@@ -85,9 +84,8 @@ void mainloop() {
 			case SDL_KEYUP:
 				mods = evt.key.keysym.mod;
 				key = evt.key.keysym.sym;
-				unicode = evt.key.keysym.unicode;
 				mods &= 0xffff - KMOD_NUM;
-				Keyinfo keyinfo = Keyinfo(key, mods, unicode);
+				Keyinfo keyinfo = Keyinfo(key, mods);
 //				com.kbd.translate(keyinfo);
 				mainui.keyrelease(keyinfo);
 				break;
@@ -102,10 +100,10 @@ void mainloop() {
 					break;
 				case 5:
 					//rootwin.windowByCoord(cx, cy).mousewheelDown();
-					mainui.keypress(Keyinfo(SDLK_DOWN, 0, 0));
+					mainui.keypress(Keyinfo(SDLK_DOWN, 0));
 					break;
 				case 4:
-					mainui.keypress(Keyinfo(SDLK_UP, 0, 0));
+					mainui.keypress(Keyinfo(SDLK_UP, 0));
 					break;
 				default:
 					break;
@@ -114,13 +112,7 @@ void mainloop() {
 				break;
 			case SDL_MOUSEMOTION:
 				break;
-			case SDL_ACTIVEEVENT:
-				break;
-			case SDL_VIDEORESIZE:
-				video.resizeEvent(evt.resize.w, evt.resize.h);
-				break;
-			case SDL_VIDEOEXPOSE:
-				mainui.update();
+			case SDL_WINDOWEVENT:
 				break;
 			default:
 				break;
@@ -162,7 +154,7 @@ int main(char[][] args) {
 	string filename;
 	bool fnDefined = false;
 
-	DerelictSDL.load();
+	DerelictSDL2.load();
 
 	import std.process;
 	auto ct_home = environment.get("CC_HOME");
@@ -181,7 +173,7 @@ int main(char[][] args) {
 			song.save("_backup.ct");
 		}
 	}
-	
+
 	try {
 		i = 1;
 		while(i < args.length) {
@@ -261,7 +253,6 @@ int main(char[][] args) {
 	mainui = new UI();
 	loadFile(filename);
 	video.updateFrame();
-		
 	SDL_PauseAudio(0);
 	mainloop();
 	audio.audio.audio_close();

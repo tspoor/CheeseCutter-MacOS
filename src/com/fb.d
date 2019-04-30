@@ -3,8 +3,10 @@ CheeseCutter v2 (C) Abaddon. Licensed under GNU GPL.
 */
 
 module com.fb;
-import derelict.sdl.sdl;
+import derelict.sdl2.sdl;
 import std.string : indexOf;
+static import com.util;
+import std.stdio;
 
 immutable SDL_Color[] PALETTE = [
 	{ 0,0,0 },       
@@ -28,6 +30,7 @@ immutable FONT_X = 8, FONT_Y = 14;
 __gshared ubyte[] font;
 immutable int mode, border = 1;
 private bool isDirty = false;
+private bool enableRepeat = false;
 
 immutable CHECKX = "assert(x >= 0 && x < width);";
 immutable CHECKY = "assert(y >= 0 && y < height);";
@@ -45,7 +48,12 @@ static this() {
 
 abstract class Video {
 	protected {
+		SDL_Window* window;
+		SDL_Renderer* renderer;
 		SDL_Surface* surface;
+	    SDL_Texture* texture;
+		SDL_Event event;
+
 		bool useFullscreen;
 		Screen screen;
 		Visualizer vis;
@@ -56,17 +64,22 @@ abstract class Video {
 	}
 	
 	this(int wx, int wy, Screen scr, int fs) {
-		const SDL_VideoInfo* vidinfo = SDL_GetVideoInfo();
+	    int display_count = 0, display_index = 0, mode_index = 0, err = 0;
+	    SDL_DisplayMode mode;
+
+		if (SDL_GetDisplayMode(display_index, mode_index, &mode) != 0) 
+			throw new DisplayError("Unable to initialize graphics mode.");
+    	
 		screen = scr;
-		displayHeight = vidinfo.current_h;
-		displayWidth = vidinfo.current_w;
+		displayHeight = mode.h;
+		displayWidth = mode.w;
 		requestedHeight = wy;
 		requestedWidth = wx;
 	}
 
 	~this() {
-		if(surface !is null)
-			SDL_FreeSurface(surface);
+		if(window !is null)
+			SDL_DestroyWindow(window);
 	}
 
 	abstract void drawVisualizer(int);
@@ -100,18 +113,27 @@ class VideoStandard : Video {
 	}
 
 	override protected void enableFullscreen(bool fs) {
+		Uint32 rmask, gmask, bmask, amask;
 		width = requestedWidth;
 		height = requestedHeight;
 		useFullscreen = fs;
-		int sdlflags = SDL_SWSURFACE;
-		sdlflags |= fs ? SDL_FULLSCREEN : 0;
-		surface = SDL_SetVideoMode(width, height, 0, sdlflags); 
-		if(surface is null) {
+		SDL_WindowFlags sdlflags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN;
+		sdlflags |= fs ? SDL_WINDOW_FULLSCREEN : 0;
+
+		if (SDL_CreateWindowAndRenderer(width, height, sdlflags, &window, &renderer))
 			throw new DisplayError("Unable to initialize graphics mode.");
-		}
-		SDL_SetPalette(surface, SDL_PHYSPAL|SDL_LOGPAL, 
-					   cast(SDL_Color *)PALETTE, 0, 16);
+
+		surface = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
+
+		SDL_SetWindowTitle(window, "CheeseCutter");
+
+		if (surface is null)
+			throw new DisplayError("Unable to initialize graphics mode.");
+
+		//SDL_SetPaletteColors(surface.format.palette, cast(SDL_Color *)PALETTE, 0, 32);
+
 		vis = new Oscilloscope(surface, 500, 14);
+
 		screen.refresh();
 	}
 
@@ -180,11 +202,22 @@ class VideoStandard : Video {
 			}
 			sptr += width*13;
 		}
+
 		SDL_UnlockSurface(surface);
-		SDL_Flip(surface);
+
+		texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+		if (texture is null)
+			throw new DisplayError("Couldn't create texture");
+
+		SDL_RenderClear(renderer);
+		SDL_RenderCopy(renderer, texture, null, null);
+        SDL_RenderPresent(renderer);
+
+
 	}
 }
-
+/*
 class VideoYUV : Video {
 	private SDL_Overlay* overlay;
 	private int correctedHeight, correctedWidth;
@@ -375,6 +408,7 @@ class VideoYUV : Video {
 		}
 	}
 }
+*/
 
 class Screen {
 	Uint16[] data;
@@ -565,14 +599,14 @@ class DisplayError : Error {
 }
 
 void enableKeyRepeat() {
-	SDL_EnableKeyRepeat(200, 10);
+	enableRepeat = true;
 }
 
 void disableKeyRepeat() {
-	SDL_EnableKeyRepeat(0, 0);
+	enableRepeat = false;
 }
 
-Uint16 readkey() {
+Uint32 readkey() {
 	SDL_Event evt;
 	bool loop = true;
 	

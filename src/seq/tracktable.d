@@ -12,7 +12,7 @@ import com.util;
 import ui.ui;
 import ui.dialogs;
 import ui.input;
-import derelict.sdl.sdl;
+import derelict.sdl2.sdl;
 import ct.base;
 
 

@@ -3,7 +3,7 @@ CheeseCutter v2 (C) Abaddon. Licensed under GNU GPL.
 */
 
 module audio.audio;
-import derelict.sdl.sdl;
+import derelict.sdl2.sdl;
 import audio.resid.filter;
 import audio.player;
 import audio.callback;
@@ -37,6 +37,8 @@ extern(C) {
 	int audio_init(int fr, void function() cb) {
 		SDL_AudioSpec requested;
 
+		SDL_memset(&requested, 0, requested.sizeof);
+
 		if(audioInited) return 0;
 
 		audioInited = true;
@@ -53,7 +55,7 @@ extern(C) {
 		requested.channels = 1;
 		requested.samples = cast(ushort) bufferSize;
 
-		requested.callback = &audio_callback_2;
+		requested.callback = cast(SDL_AudioCallback) &audio_callback_2;
 		
 		requested.userdata = null;
 		callback = cb;
@@ -96,7 +98,7 @@ extern(C) {
 		SDL_UnlockAudio();
 	}
 
-	void audio_callback(void *data, ubyte* stream, int len) {
+	void audio_callback(void *userdata, ubyte* stream, int len) {
 		int samplesRequested = cast(int) (len / short.sizeof);
 		int total = 0,todo = 0,t = 0;
 		int steps;
@@ -126,9 +128,10 @@ extern(C) {
 		assert(total == samplesRequested);
 	}
 
-	__gshared void audio_callback_2(void *data, ubyte* stream, int len) {
+	__gshared void audio_callback_2(void *userdata, ubyte* stream, int len) {
 		int samplesRequested = cast(int) (len / short.sizeof);
 		int i,t;
+		SDL_memset(stream, 0, len);
 		if(!audio.player.isPlaying()) return;
 		while((bufferUsed + callbackInterval) <= bufferSize * MIXBUF_MUL) {
 			t = sid_fillbuffer(mixbuf+bufferUsed, callbackInterval, cyclesPerFrame);

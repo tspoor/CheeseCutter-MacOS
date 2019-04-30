@@ -12,7 +12,7 @@ import audio.audio;
 import audio.resid.filter;
 import seq.sequencer;
 import ui.ui;
-import derelict.sdl.sdl;
+import derelict.sdl2.sdl;
 import std.stdio;
 
 enum Status { Stop, Play, Keyjam };
@@ -41,7 +41,7 @@ void init() {
 	SDL_LockAudio();
 	curfp = sidtype ? FP8580[curfp8580] : FP6581[curfp6581];
 	sid_init(usefp, &curfp, freq, sidtype, ntsc, interpolate, 0);
-	/+
+	/*
 	if(!audioinited) {
 		writefln("audio init: engine=%s, freq=%d, buf=%d, sid=%d, clock=%s, interpolation=%s%s",
 				 usefp ? "resid-fp" : "resid", 
@@ -55,7 +55,8 @@ void init() {
 		audio.audio.residdelay = 48;  // 4
 	}
 	else audio.audio.residdelay = 0;
-	+/
+	*/
+
 	SDL_UnlockAudio();
 }
 

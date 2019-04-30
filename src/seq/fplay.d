@@ -9,7 +9,11 @@ import seq.seqtable;
 import ui.input;
 import ct.base;
 import com.session;
-import derelict.sdl.sdl;
+import derelict.sdl2.sdl;
+static import com.fb;
+static import audio.player;
+static import audio.timer;
+static import std.conv;
 
 private int mode;
 

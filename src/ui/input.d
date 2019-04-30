@@ -3,7 +3,7 @@ CheeseCutter v2 (C) Abaddon. Licensed under GNU GPL.
 */
 
 module ui.input;
-import derelict.sdl.sdl;
+import derelict.sdl2.sdl;
 import com.fb;
 import com.session;
 import com.util;
@@ -14,6 +14,7 @@ import ui.ui;
 import std.string;
 import std.utf;
 import std.stdio : stderr;
+static import std.conv;
 
 enum { RETURN = -1, CANCEL = -2, OK = 0, WRAP = 1, WRAPR, WRAPL, EXIT, IllegalValue }
 
@@ -33,7 +34,7 @@ mixin template ValueChangedHandler() {
 
 
 struct Keyinfo {
-	int key, mods, unicode;
+	int key, mods;
 	alias key raw;
 }
 
@@ -348,7 +349,7 @@ class InputTrack : InputWord {
 
 	override int keypress(Keyinfo key) {
 		if(key.mods & KMOD_ALT) return OK;
-		switch(key.unicode)
+		switch(key.key)
 		{
 		case 6: // ctrl-f
 			int s = song.getFreeSequence(buf[1] + 1);
@@ -504,10 +505,10 @@ class InputString : Input {
 				insert();
 				setChar(' ');
 			}
-			else if(key.unicode && key.unicode != '`') {
+			else if(key.key && key.key != '`') {
 				string old = cast(string)(instring.dup);
 				insert();
-				setChar(key.unicode);
+				setChar(key.key);
 				try {
 					validate(instring);
 				}
@@ -581,7 +582,7 @@ abstract class ExtendedInput : Input {
 	int keypress(Keyinfo key, string keytab) {
 		if(key.mods & KMOD_CTRL || key.mods & KMOD_ALT)
 			return OK;
-		switch(key.unicode) {
+		switch(key.key) {
 		case ' ':
 			if(memvalue >= 0) {
 				changed = (invalue != memvalue);
@@ -701,7 +702,7 @@ class InputInstrument : ExtendedInput {
 	}
 
 	override int keypress(Keyinfo key) {
-		switch(key.unicode) {
+		switch(key.key) {
 		case SDLK_RETURN:
 			if(element.instr.value < 0x30)
 				mainui.activateInstrumentTable(element.instr.value);
@@ -770,7 +771,7 @@ class InputNote : ExtendedInput {
 			return OK;
 		}
 
-		switch(key.unicode) {
+		switch(key.key) {
 		case SDLK_RETURN:
 			if(element.instr.value < 0x30)
 				UI.activateInstrument(element.instr.value);
@@ -941,7 +942,7 @@ final class InputSeq : ExtendedInput, Undoable {
 	}
 
 	override int keypress(Keyinfo key) {
-		switch(key.unicode) {
+		switch(key.key) {
 		case SDLK_SEMICOLON:
 			state.autoinsertInstrument ^= 1;
 			UI.statusline.display(format("Instrument autoinsert mode %s",

@@ -1,38 +1,24 @@
 OBJS=   src/derelict/util/compat$(OBJ_EXT) \
-	src/derelict/util/sharedlib$(OBJ_EXT) \
-	src/derelict/util/exception$(OBJ_EXT) \
+	    src/derelict/util/sharedlib$(OBJ_EXT) \
+	    src/derelict/util/exception$(OBJ_EXT) \
         src/derelict/util/loader$(OBJ_EXT) \
         src/derelict/util/wintypes$(OBJ_EXT) \
         src/derelict/util/xtypes$(OBJ_EXT) \
-        src/derelict/sdl/sdl$(OBJ_EXT) \
-        src/derelict/sdl/net$(OBJ_EXT) \
-        src/derelict/sdl/ttf$(OBJ_EXT) \
-        src/derelict/sdl/mixer$(OBJ_EXT) \
-        src/derelict/sdl/image$(OBJ_EXT) \
-        src/derelict/sdl/sdlfuncs$(OBJ_EXT) \
-        src/derelict/sdl/sdltypes$(OBJ_EXT) \
-        src/derelict/sdl/macinit/CoreFoundation$(OBJ_EXT) \
-        src/derelict/sdl/macinit/DerelictSDLMacLoader$(OBJ_EXT) \
-        src/derelict/sdl/macinit/ID$(OBJ_EXT) \
-        src/derelict/sdl/macinit/MacTypes$(OBJ_EXT) \
-        src/derelict/sdl/macinit/NSApplication$(OBJ_EXT) \
-        src/derelict/sdl/macinit/NSArray$(OBJ_EXT) \
-        src/derelict/sdl/macinit/NSAutoreleasePool$(OBJ_EXT) \
-        src/derelict/sdl/macinit/NSDictionary$(OBJ_EXT) \
-        src/derelict/sdl/macinit/NSEnumerator$(OBJ_EXT) \
-        src/derelict/sdl/macinit/NSEvent$(OBJ_EXT) \
-        src/derelict/sdl/macinit/NSGeometry$(OBJ_EXT) \
-        src/derelict/sdl/macinit/NSMenu$(OBJ_EXT) \
-        src/derelict/sdl/macinit/NSMenuItem$(OBJ_EXT) \
-        src/derelict/sdl/macinit/NSNotification$(OBJ_EXT) \
-        src/derelict/sdl/macinit/NSObject$(OBJ_EXT) \
-        src/derelict/sdl/macinit/NSProcessInfo$(OBJ_EXT) \
-        src/derelict/sdl/macinit/NSString$(OBJ_EXT) \
-        src/derelict/sdl/macinit/NSZone$(OBJ_EXT) \
-        src/derelict/sdl/macinit/runtime$(OBJ_EXT) \
-        src/derelict/sdl/macinit/SDLMain$(OBJ_EXT) \
-        src/derelict/sdl/macinit/selectors$(OBJ_EXT) \
-        src/derelict/sdl/macinit/string$(OBJ_EXT) \
+        src/derelict/sdl2/gpu$(OBJ_EXT) \
+        src/derelict/sdl2/mixer$(OBJ_EXT) \
+        src/derelict/sdl2/image$(OBJ_EXT) \
+        src/derelict/sdl2/sdl$(OBJ_EXT) \
+        src/derelict/sdl2/config$(OBJ_EXT) \
+        src/derelict/sdl2/net$(OBJ_EXT) \
+        src/derelict/sdl2/ttf$(OBJ_EXT) \
+        src/derelict/sdl2/internal/gpu_static$(OBJ_EXT) \
+        src/derelict/sdl2/internal/gpu_types$(OBJ_EXT) \
+        src/derelict/sdl2/internal/sdl_static$(OBJ_EXT) \
+        src/derelict/sdl2/internal/sdl_dynamic$(OBJ_EXT) \
+        src/derelict/sdl2/internal/gpu_dynload$(OBJ_EXT) \
+        src/derelict/sdl2/internal/gpu_dynamic$(OBJ_EXT) \
+        src/derelict/sdl2/internal/sdl_dynload$(OBJ_EXT) \
+        src/derelict/sdl2/internal/sdl_types$(OBJ_EXT) \
 	src/audio/audio$(OBJ_EXT) \
 	src/audio/player$(OBJ_EXT) \
 	src/audio/timer$(OBJ_EXT) \

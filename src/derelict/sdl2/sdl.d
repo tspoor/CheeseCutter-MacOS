@@ -25,64 +25,49 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
 */
-module derelict.util.xtypes;
+module derelict.sdl2.sdl;
 
-version (freebsd)
-{
-    version = GLX;
-}
+import derelict.sdl2.config;
 
-else version (FreeBSD)
-{
-    version = GLX;
-}
+public:
+import derelict.sdl2.internal.sdl_types;
+static if(staticSDL)
+      import derelict.sdl2.internal.sdl_static;
+else
+      import derelict.sdl2.internal.sdl_dynload;
 
-else version (linux)
-{
-    version = GLX;
-}
 
-version(GLX)
-{
-    alias int  Bool;
-    alias uint VisualID;
-    alias byte*   XPointer;
+alias SDL_BlitSurface = SDL_UpperBlit;
+alias SDL_BlitScaled = SDL_UpperBlitScaled;
 
-    alias void Display;
-    alias uint XID;
-    alias XID Pixmap;
-    alias XID Font;
-    alias XID Window;
-
-    struct XExtData
-    {
-        int number;
-        XExtData* next;
-        extern(C) int function(XExtData*) free_private;
-        XPointer private_data;
+@nogc nothrow {
+    // SDL_audio.h
+    SDL_AudioSpec* SDL_LoadWAV(const(char)* file,SDL_AudioSpec* spec,Uint8** audio_buf,Uint32* len) {
+        return SDL_LoadWAV_RW(SDL_RWFromFile(file,"rb"),1,spec,audio_buf,len);
     }
 
-    struct Visual
-    {
-        XExtData* ext_data;
-        VisualID  visualid;
-        int       _class;
-        uint      red_mask, green_mask, blue_mask;
-        int       bits_per_rgb;
-        int       map_entries;
+    // SDL_events.h
+    Uint8 SDL_GetEventState(Uint32 type) {
+        return SDL_EventState(type,SDL_QUERY);
     }
 
-    struct XVisualInfo
-    {
-        Visual   *visual;
-        VisualID visualid;
-        int      screen;
-        int      depth;
-        int      _class;
-        uint     red_mask;
-        uint     green_mask;
-        uint     blue_mask;
-        int      colormap_size;
-        int      bits_per_rgb;
+    // SDL_GameController.h
+    int SDL_GameControllerAddMappingsFromFile(const(char)* file) {
+        return SDL_GameControllerAddMappingsFromRW(SDL_RWFromFile(file,"rb"),1);
+    }
+
+    // SDL_quit.h
+    bool SDL_QuitRequested() {
+        SDL_PumpEvents();
+        return SDL_PeepEvents(null,0,SDL_PEEKEVENT,SDL_QUIT,SDL_QUIT) > 0;
+    }
+
+    // SDL_surface.h
+    SDL_Surface* SDL_LoadBMP(const(char)* file) {
+        return SDL_LoadBMP_RW(SDL_RWFromFile(file,"rb"),1);
+    }
+
+    int SDL_SaveBMP(SDL_Surface* surface,const(char)* file) {
+        return SDL_SaveBMP_RW(surface,SDL_RWFromFile(file,"wb"),1);
     }
 }

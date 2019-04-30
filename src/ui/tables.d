@@ -10,10 +10,13 @@ import ui.help;
 import com.session;
 import com.util;
 import ct.purge;
-import derelict.sdl.sdl;
+import derelict.sdl2.sdl;
 import std.string;
 import std.stdio : stderr;
 import std.file;
+static import com.fb;
+static import std.conv;
+static import std.array;
 
 abstract class Table : Window {
 	mixin ValueChangedHandler;
@@ -142,7 +145,7 @@ private class HexTable : Table, Undoable {
 
 	override int keypress(Keyinfo key) {
 		if(key.mods & KMOD_CTRL || key.mods & KMOD_ALT || 
-		   key.mods & KMOD_META) return OK;
+		   key.mods & (KMOD_LGUI|KMOD_RGUI)) return OK;
 
 		switch(key.raw) 
 		{
@@ -517,7 +520,7 @@ class InsTable : Window {
 
 	override int keypress(Keyinfo key) {
 		if(key.mods & KMOD_ALT) return OK;
-		if(key.unicode == SDLK_RETURN || key.unicode == SDLK_TAB) {
+		if(key.key == SDLK_RETURN || key.key == SDLK_TAB) {
 			if(active == insinput) {
 				activateDescInput();
 			}

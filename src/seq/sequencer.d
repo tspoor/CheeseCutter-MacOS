@@ -17,9 +17,12 @@ import ui.dialogs;
 	import seq.seqtable;
 	import seq.trackmap;
 
-import derelict.sdl.sdl;
+import derelict.sdl2.sdl;
 import std.string;
 import std.stdio;
+
+static import audio.player; 
+static import ui.help;
 
 enum PAGESTEP = 2;
 enum Jump { toBeginning = 0, toMark = -1, toEnd = -2, toWrapMark = -3 };
@@ -817,8 +820,8 @@ final class Sequencer : Window, Undoable {
 	}
 
 	override int keypress(Keyinfo key) {
-		if(key.raw >= SDLK_KP0 && key.raw <= SDLK_KP9) {
-			stepValue = key.raw - SDLK_KP0;
+		if(key.raw >= SDLK_KP_0 && key.raw <= SDLK_KP_9) {
+			stepValue = key.raw - SDLK_KP_0;
 			return OK;
 		}
 		if(key.mods & KMOD_ALT) {

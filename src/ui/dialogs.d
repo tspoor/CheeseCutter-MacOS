@@ -3,7 +3,7 @@ CheeseCutter v2 (C) Abaddon. Licensed under GNU GPL.
 */
 
 module ui.dialogs;
-import derelict.sdl.sdl;
+import derelict.sdl2.sdl;
 import main;
 import com.fb;
 import com.util;
@@ -161,14 +161,14 @@ class HelpDialog : Window {
 	}
 
 	override int keypress(Keyinfo key) {
-		int k = key.unicode;
+		int k = key.key;
 		if(k == SDLK_SPACE ||
 		   k == SDLK_PLUS ||
 			k == SDLK_RIGHT ||
 			k == SDLK_PAGEDOWN)
 			if(page++ >= numpages) page = 1;
-		if(key.unicode == SDLK_RETURN ||
-			key.unicode == SDLK_ESCAPE) return RETURN;
+		if(key.key == SDLK_RETURN ||
+			key.key == SDLK_ESCAPE) return RETURN;
 		return OK;
 	}
 }
@@ -209,7 +209,7 @@ class DebugDialog : Window {
 	}
 
 	override int keypress(Keyinfo key) {
-		switch(key.unicode) {
+		switch(key.key) {
 		case SDLK_SPACE:
 			com.util.hexdump(seq.compact(),16);
 			break;
@@ -258,9 +258,9 @@ class AboutDialog : Window {
   
 	override int keypress(Keyinfo key) {
 		if(key.mods) return OK;
-		if(key.unicode == SDLK_ESCAPE ||
-			key.unicode == SDLK_SPACE ||
-			key.unicode == SDLK_RETURN) return RETURN;
+		if(key.key == SDLK_ESCAPE ||
+			key.key == SDLK_SPACE ||
+			key.key == SDLK_RETURN) return RETURN;
 		return OK;
 	}
 }
