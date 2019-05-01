@@ -4,15 +4,21 @@ VERSION=$(shell cat Version)
 DLINK=$(COMFLAGS)
 DFLAGS=-I./src -J./src/c64 -J./src/font
 CFLAGS=$(COMFLAGS)
-#CXXFLAGS=$(CFLAGS) -I./src -O2 -stdlib=libc++
-CXXFLAGS=$(CFLAGS) -I./src -stdlib=libc++
+CXXFLAGS=$(CFLAGS) -I./src -O2 -stdlib=libc++
+#CXXFLAGS=$(CFLAGS) -I./src -stdlib=libc++
 LDFLAGS=-rpath,@executable_path/../Frameworks
-#COMPILE.d = $(DC) $(DFLAGS) -wi -d -O2 -c -of=$@
-COMPILE.d = $(DC) $(DFLAGS) -wi -g -d -c -of=$@
+COMPILE.d = $(DC) $(DFLAGS) -wi -d -O2 -c -of=$@
+#COMPILE.d = $(DC) $(DFLAGS) -wi -g -d -c -of=$@
 DC=ldc2
 EXE=
 TARGET=ccutter
 OBJ_EXT=.o
+
+ifneq ("$(wildcard $(/Library/Frameworks/SDL2.framework))","")
+SDL2LOC = /Library/Frameworks/SDL2.framework
+else
+SDL2LOC = $(HOME)/Library/Frameworks/SDL2.framework
+endif
 
 include Makefile.objects.mk
 
@@ -42,14 +48,16 @@ release: all
 	mkdir -p CheeseCutter.app/Contents/Frameworks
 	mkdir -p CheeseCutter.app/Contents/MacOS
 	cp -r arch/MacOS/Contents CheeseCutter.app
-	cp -r /Library/Frameworks/SDL.framework CheeseCutter.app/Contents/Frameworks
+
+	cp -r $(SDL2LOC) CheeseCutter.app/Contents/Frameworks
+
 	cp $(TARGET) CheeseCutter.app/Contents/MacOS
 	cp ct2util CheeseCutter.app/Contents/MacOS
 
 dist:	release
 	rm -rf dist
-	rm -rf CheeseCutter_$(VERSION).dmg
-	arch/makedmg.sh
+	rm -f CheeseCutter_$(VERSION).dmg
+	arch/makedmg.sh $(VERSION)
 
 clean: 
 	rm -f *.o *~ resid/*.o resid-fp/*.o ccutter ct2util \
@@ -58,7 +66,7 @@ clean:
 dclean: clean
 	rm -rf dist
 	rm -rf CheeseCutter.app
-	rm -rf CheeseCutter_$(VERSION).dmg
+	rm -f CheeseCutter_$(VERSION).dmg
 
 
 tar:
