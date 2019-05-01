@@ -143,7 +143,7 @@ void printheader() {
 	stderr.writefln("  -m [0|1]         Specify SID model for reSID (6581/8580) (def=0)");
 	stderr.writefln("  -n               Enable NTSC mode");
 	stderr.writefln("  -r [value]       Set playback frequency (def=48000)");
-	stderr.writefln("  -y               Use YUV video overlay");
+	//stderr.writefln("  -y               Use YUV video overlay");
 	stderr.writef("\n");
 }
 
@@ -218,9 +218,9 @@ int main(char[][] args) {
 			case "-nofp":
 				audio.player.usefp = 0;
 				break;
-			case "-y", "-ya", "-yuv":	
-				yuvOverlay = true;
-				break;
+		//	case "-y", "-ya", "-yuv":	
+		//		yuvOverlay = true;
+		//		break;
 			default:
 				version (OSX) {
 					if (args[i].length > 3 && args[i][0..4] == "-psn"){

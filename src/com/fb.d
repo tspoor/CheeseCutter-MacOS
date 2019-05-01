@@ -117,18 +117,18 @@ class VideoStandard : Video {
 		width = requestedWidth;
 		height = requestedHeight;
 		useFullscreen = fs;
-		SDL_WindowFlags sdlflags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN;
+		SDL_WindowFlags sdlflags = SDL_WINDOW_SHOWN;
 		sdlflags |= fs ? SDL_WINDOW_FULLSCREEN : 0;
 
 		if (SDL_CreateWindowAndRenderer(width, height, sdlflags, &window, &renderer))
-			throw new DisplayError("Unable to initialize graphics mode.");
-
-		surface = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
+			throw new DisplayError("Unable to create SDL Window.");
 
 		SDL_SetWindowTitle(window, "CheeseCutter");
 
+		surface = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
+
 		if (surface is null)
-			throw new DisplayError("Unable to initialize graphics mode.");
+			throw new DisplayError("Unable to create RGB Surface.");
 
 		//SDL_SetPaletteColors(surface.format.palette, cast(SDL_Color *)PALETTE, 0, 32);
 
@@ -208,7 +208,7 @@ class VideoStandard : Video {
 		texture = SDL_CreateTextureFromSurface(renderer, surface);
 
 		if (texture is null)
-			throw new DisplayError("Couldn't create texture");
+			throw new DisplayError("Couldn't create texture from Surface");
 
 		SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer, texture, null, null);
@@ -219,8 +219,11 @@ class VideoStandard : Video {
 }
 /*
 class VideoYUV : Video {
-	private SDL_Overlay* overlay;
+	private SDL_Texture* texture;
 	private int correctedHeight, correctedWidth;
+	Uint8* yPlane, uPlane, vPlane;
+	size_t yPlaneSz, uvPlaneSz;
+	int uvPitch;
 	
 	this(int wx, int wy, Screen scr, int fs) {
 		super(wx, wy, scr, fs);
@@ -229,8 +232,8 @@ class VideoYUV : Video {
 	}
 
 	~this() {
-		if(overlay !is null)
-			SDL_FreeYUVOverlay(overlay);
+		//if(texture !is null)
+		//	SDL_FreeYUVOverlay(overlay);
 	}
 
 	private void calcAspect() {
